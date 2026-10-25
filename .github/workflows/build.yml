@@ -40,11 +40,23 @@ jobs:
           name: AVRadio-apk
           path: salida/AVRadio.apk
 
-      - name: Publicar para la actualización automática
+      # Canal de PRUEBAS: se publica siempre
+      - name: Publicar en canal de pruebas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete avradio-pruebas --cleanup-tag -y || true
+          gh release create avradio-pruebas salida/AVRadio.apk salida/version.txt \
+            --title "AVRadio pruebas · build ${{ github.run_number }}" \
+            --notes "AVRadio · Creado por DanLab (versión de pruebas)" --prerelease
+
+      # Canal ESTABLE: solo si en el mensaje del cambio pones la palabra "estable"
+      - name: Publicar en canal estable
+        if: contains(github.event.head_commit.message, 'estable')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete avradio --cleanup-tag -y || true
           gh release create avradio salida/AVRadio.apk salida/version.txt \
-            --title "AVRadio 0.3.${{ github.run_number }}" \
-            --notes "AVRadio · Creado por DanLab"
+            --title "AVRadio · build ${{ github.run_number }}" \
+            --notes "AVRadio · Creado por DanLab" --latest
