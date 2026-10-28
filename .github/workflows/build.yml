@@ -27,6 +27,8 @@ jobs:
 
       - name: Compilar
         working-directory: build-src
+        env:
+          FMLIST_KEY: ${{ secrets.FMLIST_KEY }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Preparar archivos
