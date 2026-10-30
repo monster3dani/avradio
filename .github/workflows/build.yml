@@ -25,10 +25,19 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - name: Preparar la firma (desde los secretos)
+        env:
+          KS: ${{ secrets.AVRADIO_KEYSTORE }}
+        run: |
+          if [ -z "$KS" ]; then echo "Falta el secreto AVRADIO_KEYSTORE"; exit 1; fi
+          echo "$KS" | base64 -d > "$RUNNER_TEMP/avradio.jks"
+
       - name: Compilar
         working-directory: build-src
         env:
           FMLIST_KEY: ${{ secrets.FMLIST_KEY }}
+          AVRADIO_KEYSTORE_FILE: ${{ runner.temp }}/avradio.jks
+          AVRADIO_KEY_PASS: ${{ secrets.AVRADIO_KEY_PASS }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Preparar archivos
